@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS settings (
   phone VARCHAR(40) DEFAULT NULL,
   address VARCHAR(255) DEFAULT NULL,
   payment_instructions TEXT,
+  whatsapp_number VARCHAR(30) DEFAULT NULL,
+  whatsapp_message VARCHAR(255) DEFAULT 'Hi, I need help with wallpaper and painting services.',
+  email_sender_name VARCHAR(120) DEFAULT 'PaintPro',
+  email_sender_address VARCHAR(120) DEFAULT 'noreply@paintpro.local',
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -70,6 +74,15 @@ CREATE TABLE IF NOT EXISTS product_images (
   CONSTRAINT fk_product_images_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS customers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  phone VARCHAR(30) NOT NULL,
+  email VARCHAR(120) DEFAULT NULL,
+  address VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS leads (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
@@ -95,13 +108,15 @@ CREATE TABLE IF NOT EXISTS testimonials (
 
 CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_id INT DEFAULT NULL,
   name VARCHAR(120) NOT NULL,
   phone VARCHAR(30) NOT NULL,
   email VARCHAR(120) NOT NULL,
   address VARCHAR(255) NOT NULL,
   total_amount DECIMAL(10,2) NOT NULL,
   status ENUM('Pending','Processing','Completed','Cancelled') DEFAULT 'Pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
@@ -118,13 +133,24 @@ CREATE TABLE IF NOT EXISTS email_templates (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
   subject VARCHAR(255) NOT NULL,
-  body TEXT NOT NULL,
-  status_trigger VARCHAR(80) NOT NULL,
+  body MEDIUMTEXT NOT NULL,
+  trigger_type ENUM('order_created','order_status_updated','new_lead') NOT NULL,
+  status ENUM('enabled','disabled') DEFAULT 'enabled',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO settings (site_name, site_description, contact_email, phone, address, payment_instructions)
-SELECT 'PaintPro', 'Professional painting and wallpaper solutions.', 'hello@paintpro.com', '+1 (555) 321-9988', '245 Design Street, New York, USA', 'Cash on Delivery (COD). Our team will contact you to confirm order details.'
+CREATE TABLE IF NOT EXISTS notifications (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  type ENUM('lead','order') NOT NULL,
+  title VARCHAR(160) NOT NULL,
+  message VARCHAR(255) NOT NULL,
+  link VARCHAR(255) DEFAULT NULL,
+  is_read TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO settings (site_name, site_description, contact_email, phone, address, payment_instructions, whatsapp_number, whatsapp_message, email_sender_name, email_sender_address)
+SELECT 'PaintPro', 'Professional painting and wallpaper solutions.', 'hello@paintpro.com', '+1 (555) 321-9988', '245 Design Street, New York, USA', 'Cash on Delivery (COD). Our team will contact you to confirm order details.', '15553219988', 'Hi, I want to request painting/wallpaper service.', 'PaintPro', 'noreply@paintpro.local'
 WHERE NOT EXISTS (SELECT 1 FROM settings);
 
 INSERT INTO users (name, email, password, role)

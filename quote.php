@@ -26,7 +26,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$name, $phone, $email, $productId, $serviceType ?: null, $message, $roomSize ?: null, $imageName]);
 
-        setFlash('success', 'Your lead request has been submitted successfully.');
+        $leadId = (int)$pdo->lastInsertId();
+        addNotification($pdo, 'lead', 'New Lead Received', 'Lead from ' . $name . ' (' . $phone . ')', 'leads.php');
+        sendTemplateEmail($pdo, 'new_lead', $email, [
+            'customer_name' => $name,
+            'order_id' => '',
+            'order_status' => '',
+            'product_name' => ''
+        ]);
+
+        setFlash('success', 'Your lead request has been submitted successfully. Reference #' . $leadId);
         redirect('quote.php');
     } catch (Throwable $e) {
         setFlash('danger', $e->getMessage());

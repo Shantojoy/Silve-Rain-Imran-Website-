@@ -1,23 +1,24 @@
 # PaintPro - Core PHP Painting & Wallpaper Website
 
-Upgraded Core PHP + MySQL business website with lead management, order (COD) flow, categories, settings, and a modern responsive admin panel.
+Upgraded Core PHP + MySQL system with CRM, lead/order notifications, advanced settings, and improved admin UX.
 
-## Key Modules
+## Major Upgrades
 
-- Frontend pages: home, services, gallery filter, shop search, product details slider, quote form, contact, checkout.
-- Admin panel: dashboard, categories, services, products (main + gallery images), gallery, leads, orders, testimonials, email templates, settings.
-- Security: PDO prepared statements, session auth, route protection, validated uploads (jpg/png + max 5MB).
+- Modern responsive admin sidebar with icons, hints, and notification bell.
+- Fixed lead submission flow with robust validation and database save.
+- Customer management (list + profile with order history and spending).
+- Order checkout now redirects to a dedicated `thank-you.php` success page.
+- Advanced email templates (trigger type + enabled/disabled + HTML body preview).
+- Frontend WhatsApp floating button configurable from settings.
 
-## New Database Entities
+## New/Updated Modules
 
-- `settings`
-- `categories`
-- `product_images`
-- `orders`
-- `order_items`
-- `email_templates`
-
-Use `database.sql` for full schema.
+- `admin/customers.php`
+- `admin/customer-view.php`
+- `admin/mark-notifications-read.php`
+- `thank-you.php`
+- `admin/email-templates.php` (advanced)
+- `admin/settings.php` (WhatsApp + email sender)
 
 ## Run Locally
 
