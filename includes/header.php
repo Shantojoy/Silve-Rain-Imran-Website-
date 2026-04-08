@@ -25,7 +25,7 @@ if($showAdminShell){$unreadCount=(int)$pdo->query('SELECT COUNT(*) FROM notifica
 <div class="admin-shell d-flex">
 <aside class="admin-sidebar bg-white border-end expanded" id="adminSidebar">
 <div class="sidebar-brand py-3 text-center border-bottom fw-bold"><i class="bi bi-brush"></i> <span class="menu-text"><?= htmlspecialchars($siteName); ?></span></div>
-<div class="p-2 overflow-auto" style="height:calc(100vh - 120px)">
+<div class="p-2">
 <a href="dashboard.php" class="admin-link <?= $currentFile==='dashboard.php'?'active':''; ?>"><i class="bi bi-speedometer2"></i><span class="menu-text">Dashboard</span></a>
 <a class="admin-link" data-bs-toggle="collapse" href="#menuServices"><i class="bi bi-briefcase"></i><span class="menu-text">Services</span></a>
 <div class="collapse <?= in_array($currentFile,['services.php'])?'show':''; ?>" id="menuServices"><a href="services.php" class="admin-sublink">All Services</a></div>

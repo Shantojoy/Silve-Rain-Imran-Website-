@@ -1,27 +1,29 @@
 # PaintPro Business Management System (Core PHP)
 
-Professional Website + CRM + Invoice + Quotation + Blog CMS for a Painting & Wallpaper company.
+Professional Website + CRM + Invoice + Quotation + Blog CMS for Painting & Wallpaper business.
 
 ## Stack
 - Core PHP (no framework)
 - MySQL
 - Bootstrap 5
 - Vanilla JavaScript
-- TinyMCE Free CDN (rich text editor)
+- CKEditor 5 (free build, no API key)
 
-## Includes
-- Leads + Customers + Orders
-- Invoices + Payments + Quotations (convert quotation to invoice)
-- Blog CMS (categories + posts + SEO fields)
-- Gallery with rich description + location
-- Product SEO slug + multi-image gallery
-- Settings: logo, favicon, WhatsApp, invoice settings, email sender
-- Notification bell + WhatsApp floating button
+## Implemented Modules
+- Leads (status + notes), Customers, Orders
+- Invoices, Payments, Quotations (with convert to invoice)
+- Product catalog, Services, Gallery (location + rich description)
+- Blog CMS (categories + blogs + SEO fields)
+- Settings split support (general + invoice + quotation)
+- Notifications + WhatsApp floating button
+
+## Admin Module Structure
+List/Add/Edit pages are available for major modules (products, services, gallery, blogs, customers, invoices, quotations) via dedicated files under `/admin`.
 
 ## Run Locally
 1. Import `database.sql`
 2. Configure database in `includes/db.php`
-3. Run server:
+3. Run:
    ```bash
    php -S localhost:8000
    ```

@@ -16,7 +16,7 @@
 <?php endif; ?>
 <?php endif; ?>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script src="<?= (strpos($_SERVER['PHP_SELF'], '/admin/') !== false ? '../' : ''); ?>assets/js/main.js"></script>
 </body>
 </html>

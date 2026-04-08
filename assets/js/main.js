@@ -14,12 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (window.tinymce) {
-    tinymce.init({
-      selector: 'textarea.editor',
-      height: 320,
-      plugins: 'link image lists table code preview',
-      toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code preview'
+  if (window.ClassicEditor) {
+    document.querySelectorAll('textarea.editor').forEach((el) => {
+      if (!el.dataset.editorInit) {
+        ClassicEditor.create(el).catch((error) => console.error(error));
+        el.dataset.editorInit = "1";
+      }
     });
   }
 

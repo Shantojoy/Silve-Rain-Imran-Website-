@@ -101,6 +101,8 @@ CREATE TABLE IF NOT EXISTS leads (
   message TEXT NOT NULL,
   room_size VARCHAR(120) DEFAULT NULL,
   image VARCHAR(255) DEFAULT NULL,
+  status ENUM('New','Contacted','Qualified','Converted','Closed') DEFAULT 'New',
+  notes TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_leads_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
 );

@@ -22,9 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $imageName = uploadImage('image', __DIR__ . '/uploads/leads');
 
-        $sql = 'INSERT INTO leads (name,phone,email,product_id,service_type,message,room_size,image) VALUES (?,?,?,?,?,?,?,?)';
+        $sql = 'INSERT INTO leads (name,phone,email,product_id,service_type,message,room_size,image,status) VALUES (?,?,?,?,?,?,?,?,?)';
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$name, $phone, $email, $productId, $serviceType ?: null, $message, $roomSize ?: null, $imageName]);
+        $stmt->execute([$name, $phone, $email, $productId, $serviceType ?: null, $message, $roomSize ?: null, $imageName, 'New']);
 
         $leadId = (int)$pdo->lastInsertId();
         addNotification($pdo, 'lead', 'New Lead Received', 'Lead from ' . $name . ' (' . $phone . ')', 'leads.php');
