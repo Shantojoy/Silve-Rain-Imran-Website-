@@ -42,15 +42,15 @@ require_once __DIR__ . '/../includes/header.php';
 <p class="text-muted">Manage business branding, WhatsApp, and email sender values from one place.</p>
 <div class="card p-3 shadow-sm">
 <form method="post" enctype="multipart/form-data" class="row g-3">
-<div class="col-md-6"><label class="form-label">Site Name</label><input name="site_name" class="form-control" value="<?= htmlspecialchars($settings['site_name'] ?? ''); ?>" required></div>
-<div class="col-md-6"><label class="form-label">Site Logo</label><input type="file" name="site_logo" class="form-control" accept="image/jpeg,image/png"></div>
+<div class="col-md-6"><label class="form-label">Site Name <span class="text-danger">*</span></label><input name="site_name" class="form-control" placeholder="PaintPro" value="<?= htmlspecialchars($settings['site_name'] ?? ''); ?>" required><?= helpText('Enter your brand/business name as shown in navbar and footer.'); ?></div>
+<div class="col-md-6"><label class="form-label">Site Logo</label><input type="file" name="site_logo" class="form-control" accept="image/jpeg,image/png"><?= helpText('Upload PNG/JPG logo used in website branding.'); ?></div>
 <div class="col-12"><label class="form-label">Site Description</label><textarea name="site_description" class="form-control" rows="2"><?= htmlspecialchars($settings['site_description'] ?? ''); ?></textarea></div>
 <div class="col-md-4"><label class="form-label">Contact Email</label><input name="contact_email" class="form-control" value="<?= htmlspecialchars($settings['contact_email'] ?? ''); ?>"></div>
 <div class="col-md-4"><label class="form-label">Phone</label><input name="phone" class="form-control" value="<?= htmlspecialchars($settings['phone'] ?? ''); ?>"></div>
 <div class="col-md-4"><label class="form-label">Address</label><input name="address" class="form-control" value="<?= htmlspecialchars($settings['address'] ?? ''); ?>"></div>
-<div class="col-12"><label class="form-label">Payment Instructions (COD)</label><textarea name="payment_instructions" class="form-control" rows="3"><?= htmlspecialchars($settings['payment_instructions'] ?? ''); ?></textarea></div>
+<div class="col-12"><label class="form-label">Payment Instructions (COD)</label><textarea name="payment_instructions" class="form-control" rows="3" placeholder="Cash on delivery instructions shown at checkout"><?= htmlspecialchars($settings['payment_instructions'] ?? ''); ?></textarea><?= helpText('This text appears on checkout page before order placement.'); ?></div>
 <hr>
-<div class="col-md-6"><label class="form-label">WhatsApp Number (countrycode + number)</label><input name="whatsapp_number" class="form-control" value="<?= htmlspecialchars($settings['whatsapp_number'] ?? ''); ?>" placeholder="15551234567"></div>
+<div class="col-md-6"><label class="form-label">WhatsApp Number (countrycode + number)</label><input name="whatsapp_number" class="form-control" value="<?= htmlspecialchars($settings['whatsapp_number'] ?? ''); ?>" placeholder="15551234567"><?= helpText('Used for floating WhatsApp button on frontend.'); ?></div>
 <div class="col-md-6"><label class="form-label">WhatsApp Default Message</label><input name="whatsapp_message" class="form-control" value="<?= htmlspecialchars($settings['whatsapp_message'] ?? ''); ?>"></div>
 <div class="col-md-6"><label class="form-label">Email Sender Name</label><input name="email_sender_name" class="form-control" value="<?= htmlspecialchars($settings['email_sender_name'] ?? ''); ?>"></div>
 <div class="col-md-6"><label class="form-label">Email Sender Address</label><input name="email_sender_address" class="form-control" value="<?= htmlspecialchars($settings['email_sender_address'] ?? ''); ?>"></div>

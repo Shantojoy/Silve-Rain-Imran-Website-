@@ -18,8 +18,8 @@ if (isset($_GET['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $id = (int)($_POST['id'] ?? 0);
-        $title = sanitize($_POST['title'] ?? '');
-        $description = sanitize($_POST['description'] ?? '');
+        $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
         $categoryId = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
         if (!$title || !$description) throw new RuntimeException('Title and description are required.');
         $newImage = uploadImage('image', __DIR__ . '/../uploads/products');
@@ -44,6 +44,31 @@ $rows = $pdo->query('SELECT s.*, c.name as category_name FROM services s LEFT JO
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <h1 class="section-title">Manage Services</h1>
-<div class="card p-3 shadow-sm mb-4"><form method="post" enctype="multipart/form-data" class="row g-2"><input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0); ?>"><div class="col-md-3"><input name="title" class="form-control" placeholder="Service title" value="<?= htmlspecialchars($edit['title'] ?? ''); ?>" required></div><div class="col-md-3"><select name="category_id" class="form-select"><option value="">Select category</option><?php foreach($serviceCats as $cat): ?><option value="<?= $cat['id']; ?>" <?= (int)($edit['category_id'] ?? 0)===(int)$cat['id']?'selected':''; ?>><?= htmlspecialchars($cat['name']); ?></option><?php endforeach; ?></select></div><div class="col-md-4"><input name="description" class="form-control" value="<?= htmlspecialchars($edit['description'] ?? ''); ?>" placeholder="Description" required></div><div class="col-md-2"><input type="file" name="image" class="form-control" accept="image/jpeg,image/png"></div><div class="col-12"><button class="btn btn-dark"><?= $edit ? 'Update' : 'Add'; ?> Service</button></div></form></div>
-<div class="card shadow-sm"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Title</th><th>Category</th><th>Image</th><th>Action</th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['title']); ?></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td><?php if($r['image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>">Edit</a> <a class="btn btn-sm btn-danger" data-confirm="Delete this service?" href="?delete=<?= $r['id']; ?>">Delete</a></td></tr><?php endforeach; ?></tbody></table></div></div>
+<div class="card p-3 shadow-sm mb-4">
+    <h6 class="mb-3">Service Form</h6>
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+        <input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0); ?>">
+        <div class="col-md-4">
+            <label class="form-label">Service Title <span class="text-danger">*</span></label>
+            <input name="title" class="form-control" placeholder="Interior Wall Painting" value="<?= htmlspecialchars($edit['title'] ?? ''); ?>" required>
+            <?= helpText('Use a clear service name customers can understand quickly.'); ?>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Category</label>
+            <select name="category_id" class="form-select"><option value="">Select category</option><?php foreach($serviceCats as $cat): ?><option value="<?= $cat['id']; ?>" <?= (int)($edit['category_id'] ?? 0)===(int)$cat['id']?'selected':''; ?>><?= htmlspecialchars($cat['name']); ?></option><?php endforeach; ?></select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Service Image</label>
+            <input type="file" name="image" class="form-control" accept="image/jpeg,image/png">
+            <?= helpText('Upload JPG or PNG image, max 5MB.'); ?>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Description <span class="text-danger">*</span></label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Explain what this service includes" required><?= htmlspecialchars($edit['description'] ?? ''); ?></textarea>
+            <?= helpText('Include what is covered, materials, and expected finish.'); ?>
+        </div>
+        <div class="col-12"><button class="btn btn-dark"><i class="bi bi-save"></i> <?= $edit ? 'Update' : 'Add'; ?> Service</button></div>
+    </form>
+</div>
+<div class="card shadow-sm"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Title</th><th>Category</th><th>Image</th><th>Action</th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['title']); ?></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td><?php if($r['image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Edit"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-danger" data-confirm="Delete this service?" href="?delete=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Delete"><i class="bi bi-trash"></i></a></td></tr><?php endforeach; ?></tbody></table></div></div>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

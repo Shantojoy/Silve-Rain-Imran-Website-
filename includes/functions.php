@@ -78,3 +78,8 @@ function sendTemplateEmail(PDO $pdo, string $triggerType, string $toEmail, array
     $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
     @mail($toEmail, $subject, $body, $headers);
 }
+
+function helpText(string $text): string
+{
+    return '<div class="text-muted small mt-1">' . htmlspecialchars($text) . '</div>';
+}

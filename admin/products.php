@@ -15,11 +15,11 @@ if (isset($_GET['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $id = (int)($_POST['id'] ?? 0);
-        $name = sanitize($_POST['name'] ?? '');
+        $name = trim($_POST['name'] ?? '');
         $price = (float)($_POST['price'] ?? 0);
         $description = trim($_POST['description'] ?? '');
         $categoryId = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
-        if (!$name || !$description) throw new RuntimeException('Name and description required.');
+        if (!$name || !$description || $price < 0) throw new RuntimeException('Valid name, price and description are required.');
 
         $mainImage = uploadImage('main_image', __DIR__.'/../uploads/products');
         $galleryImages = uploadMultipleImages('gallery_images', __DIR__.'/../uploads/products');
@@ -27,16 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id) {
             $cur = $pdo->prepare('SELECT main_image FROM products WHERE id=?'); $cur->execute([$id]); $old = $cur->fetch();
             $pdo->prepare('UPDATE products SET name=?,price=?,description=?,category_id=?,main_image=? WHERE id=?')->execute([$name,$price,$description,$categoryId,$mainImage ?: $old['main_image'],$id]);
-            foreach ($galleryImages as $g) {
-                $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$id,$g]);
-            }
+            foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$id,$g]);
             setFlash('success', 'Product updated.');
         } else {
             $pdo->prepare('INSERT INTO products (name,price,description,category_id,main_image,is_virtual) VALUES (?,?,?,?,?,1)')->execute([$name,$price,$description,$categoryId,$mainImage]);
             $productId = (int)$pdo->lastInsertId();
-            foreach ($galleryImages as $g) {
-                $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$productId,$g]);
-            }
+            foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$productId,$g]);
             setFlash('success', 'Product added.');
         }
     } catch (Throwable $e) { setFlash('danger', $e->getMessage()); }
@@ -69,7 +65,41 @@ if (isset($_GET['edit'])) {
 require_once __DIR__ . '/../includes/header.php';
 ?>
 <h1 class="section-title">Products</h1>
-<div class="card p-3 shadow-sm mb-3"><form method="post" enctype="multipart/form-data" class="row g-2"><input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0); ?>"><div class="col-md-2"><input name="name" class="form-control" placeholder="Name" value="<?= htmlspecialchars($edit['name'] ?? ''); ?>" required></div><div class="col-md-2"><input type="number" step="0.01" name="price" class="form-control" placeholder="Price" value="<?= htmlspecialchars($edit['price'] ?? ''); ?>" required></div><div class="col-md-2"><select name="category_id" class="form-select"><option value="">Category</option><?php foreach($categories as $cat): ?><option value="<?= $cat['id']; ?>" <?= (int)($edit['category_id'] ?? 0)===(int)$cat['id']?'selected':''; ?>><?= htmlspecialchars($cat['name']); ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input type="file" name="main_image" class="form-control" accept="image/jpeg,image/png"></div><div class="col-md-3"><input type="file" name="gallery_images[]" class="form-control" multiple accept="image/jpeg,image/png"></div><div class="col-12"><textarea name="description" class="form-control" rows="3" placeholder="Long description" required><?= htmlspecialchars($edit['description'] ?? ''); ?></textarea></div><div class="col-12"><button class="btn btn-dark"><?= $edit ? 'Update':'Add'; ?> Product</button></div></form></div>
+<div class="card p-3 shadow-sm mb-3">
+    <h6 class="mb-3">Product Form</h6>
+    <form method="post" enctype="multipart/form-data" class="row g-3">
+        <input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0); ?>">
+        <div class="col-md-4">
+            <label class="form-label">Product Name <span class="text-danger">*</span></label>
+            <input name="name" class="form-control" placeholder="Modern Grey Wallpaper" value="<?= htmlspecialchars($edit['name'] ?? ''); ?>" required>
+            <?= helpText('Enter a clear product name (e.g., Modern Grey Wallpaper).'); ?>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Price (USD) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" name="price" class="form-control" placeholder="99.99" value="<?= htmlspecialchars($edit['price'] ?? ''); ?>" required>
+            <?= helpText('Price is per design package in USD.'); ?>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Category</label>
+            <select name="category_id" class="form-select"><option value="">Category</option><?php foreach($categories as $cat): ?><option value="<?= $cat['id']; ?>" <?= (int)($edit['category_id'] ?? 0)===(int)$cat['id']?'selected':''; ?>><?= htmlspecialchars($cat['name']); ?></option><?php endforeach; ?></select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Main Image</label>
+            <input type="file" name="main_image" class="form-control" accept="image/jpeg,image/png">
+            <?= helpText('Upload JPG/PNG, max 5MB. This appears on listing pages.'); ?>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Gallery Images</label>
+            <input type="file" name="gallery_images[]" class="form-control" multiple accept="image/jpeg,image/png">
+            <?= helpText('You can upload multiple additional preview images.'); ?>
+        </div>
+        <div class="col-12">
+            <label class="form-label">Description <span class="text-danger">*</span></label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Write full product details" required><?= htmlspecialchars($edit['description'] ?? ''); ?></textarea>
+        </div>
+        <div class="col-12"><button class="btn btn-dark"><i class="bi bi-save"></i> <?= $edit ? 'Update':'Add'; ?> Product</button></div>
+    </form>
+</div>
 <?php if ($editImages): ?><div class="card p-3 shadow-sm mb-3"><strong>Current Gallery Images</strong><div class="d-flex flex-wrap gap-2 mt-2"><?php foreach($editImages as $img): ?><div><img src="../uploads/products/<?= htmlspecialchars($img['image']); ?>" width="80"><br><a class="text-danger small" href="?edit=<?= (int)$edit['id']; ?>&delete_image=<?= $img['id']; ?>">remove</a></div><?php endforeach; ?></div></div><?php endif; ?>
-<div class="card shadow-sm"><div class="card-body border-bottom"><form class="row g-2"><div class="col-md-4"><input class="form-control" name="search" placeholder="Search product" value="<?= htmlspecialchars($search); ?>"></div><div class="col-md-2"><button class="btn btn-outline-dark">Search</button></div></form></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Main Image</th><th></th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['name']); ?></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td>$<?= number_format((float)$r['price'],2); ?></td><td><?php if($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>">Edit</a> <a class="btn btn-sm btn-danger" data-confirm="Delete this product?" href="?delete=<?= $r['id']; ?>">Delete</a></td></tr><?php endforeach; ?></tbody></table></div><div class="card-body"><?php for($i=1;$i<=$pagination['total_pages'];$i++): ?><a class="btn btn-sm <?= $i===$pagination['page'] ? 'btn-dark' : 'btn-outline-dark'; ?>" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>"><?= $i; ?></a> <?php endfor; ?></div></div>
+<div class="card shadow-sm"><div class="card-body border-bottom"><form class="row g-2"><div class="col-md-4"><input class="form-control" name="search" placeholder="Search product" value="<?= htmlspecialchars($search); ?>"></div><div class="col-md-2"><button class="btn btn-outline-dark"><i class="bi bi-search"></i> Search</button></div></form></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Main Image</th><th></th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['name']); ?></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td>$<?= number_format((float)$r['price'],2); ?></td><td><?php if($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Edit"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-danger" data-confirm="Delete this product?" href="?delete=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Delete"><i class="bi bi-trash"></i></a></td></tr><?php endforeach; ?></tbody></table></div><div class="card-body"><?php for($i=1;$i<=$pagination['total_pages'];$i++): ?><a class="btn btn-sm <?= $i===$pagination['page'] ? 'btn-dark' : 'btn-outline-dark'; ?>" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>"><?= $i; ?></a> <?php endfor; ?></div></div>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
