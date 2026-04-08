@@ -15,11 +15,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (window.ClassicEditor) {
+    const editorMap = new Map();
     document.querySelectorAll('textarea.editor').forEach((el) => {
       if (!el.dataset.editorInit) {
-        ClassicEditor.create(el).catch((error) => console.error(error));
+        ClassicEditor.create(el)
+          .then((editor) => editorMap.set(el, editor))
+          .catch((error) => console.error(error));
         el.dataset.editorInit = "1";
       }
+    });
+
+    document.querySelectorAll('form').forEach((form) => {
+      form.addEventListener('submit', () => {
+        editorMap.forEach((editor) => {
+          editor.updateSourceElement();
+        });
+      });
     });
   }
 
