@@ -1,7 +1,14 @@
-body { background-color: #f8f9fa; }
+body { background:#f5f7fb; }
 .hero-slide { min-height: 60vh; background-size: cover; background-position: center; border-radius: 1rem; }
 .hero-overlay { background: rgba(0,0,0,.55); color:#fff; min-height:60vh; border-radius:1rem; }
 .section-title { font-weight:700; margin-bottom:1.25rem; }
 .card-img-top { height: 220px; object-fit: cover; }
 .before-after img { height: 250px; object-fit: cover; width: 100%; border-radius: .5rem; }
-.table-responsive { overflow-x: auto; }
+.admin-shell { min-height: 100vh; }
+.admin-sidebar { width: 230px; }
+.admin-sidebar a { text-decoration:none; opacity:.95; }
+.admin-sidebar a:hover { opacity:1; }
+@media (max-width: 991px) {
+  .admin-shell { display:block !important; }
+  .admin-sidebar { width:100%; }
+}
