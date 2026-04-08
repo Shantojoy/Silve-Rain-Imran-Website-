@@ -40,9 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($id) {
             $cur = $pdo->prepare('SELECT main_image FROM products WHERE id=?'); $cur->execute([$id]); $old = $cur->fetch();
             $pdo->prepare('UPDATE products SET name=?,slug=?,price=?,description=?,category_id=?,main_image=? WHERE id=?')->execute([$name,$slug,$price,$description,$categoryId,$mainImage ?: $old['main_image'],$id]);
+            if ($mainImage && !empty($old['main_image'])) {
+                deleteUploadedFile(__DIR__.'/../uploads/products/'.$old['main_image']);
+            }
             foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$id,$g]);
             setFlash('success', 'Product updated.');
         } else {
+            if (!$mainImage) throw new RuntimeException('Main image is required when adding a new product.');
             $pdo->prepare('INSERT INTO products (name,slug,price,description,category_id,main_image,is_virtual) VALUES (?,?,?,?,?,?,1)')->execute([$name,$slug,$price,$description,$categoryId,$mainImage]);
             $productId = (int)$pdo->lastInsertId();
             foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$productId,$g]);

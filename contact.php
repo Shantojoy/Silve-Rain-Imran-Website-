@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/functions.php';
 
 $settings = $pdo->query('SELECT * FROM settings LIMIT 1')->fetch();
 
@@ -20,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt = $pdo->prepare('INSERT INTO leads (name, phone, email, service_type, message, status) VALUES (?, ?, ?, ?, ?, ?)');
         $stmt->execute([$name, $phone ?: '-', $email, 'Contact Inquiry', $message, 'New']);
+        addNotification($pdo, 'lead', 'New Contact Inquiry', 'Contact request from ' . $name . ($phone ? ' (' . $phone . ')' : ''), 'leads.php');
 
         setFlash('success', 'Thanks for contacting us! We will respond shortly.');
     } catch (Throwable $e) {
