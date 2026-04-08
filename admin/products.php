@@ -4,10 +4,10 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
 requireLogin();
 
-$view = $_GET['view'] ?? 'all';
+$view = isset($_GET['view']) ? $_GET['view'] : 'all';
 $returnPage = in_array($view, ['add', 'edit', 'list', 'all'], true) ? $view : 'all';
 
-function productRedirect(string $returnPage, int $editId = 0): void
+function productRedirect($returnPage, $editId = 0)
 {
     if ($returnPage === 'add') {
         redirect('product-add.php');
@@ -39,16 +39,16 @@ if (isset($_GET['delete'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($_POST)) {
         setFlash('danger', 'Product could not be saved. Please check upload size limits and required fields.');
-        productRedirect($returnPage, (int)($_GET['edit'] ?? 0));
+        $editFromQuery = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
+        productRedirect($returnPage, $editFromQuery);
     }
 
- main
     try {
-        $id = (int)($_POST['id'] ?? 0);
-        $name = trim($_POST['name'] ?? '');
-        $price = (float)($_POST['price'] ?? 0);
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $name = trim(isset($_POST['name']) ? $_POST['name'] : '');
+        $price = (float)(isset($_POST['price']) ? $_POST['price'] : 0);
         $slugBase = slugify($name);
-        $description = trim($_POST['description'] ?? '');
+        $description = trim(isset($_POST['description']) ? $_POST['description'] : '');
         $categoryId = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
 
         if (!$name || !$description || $price < 0) {
@@ -100,21 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('products-list.php');
     } catch (Throwable $e) {
         setFlash('danger', $e->getMessage());
-        productRedirect($returnPage, $id ?? 0);
+        productRedirect($returnPage, isset($id) ? $id : 0);
     }
-            setFlash('success', 'Product updated successfully.');
-        } else {
-            $pdo->prepare('INSERT INTO products (name,slug,price,description,category_id,main_image,is_virtual) VALUES (?,?,?,?,?,?,1)')->execute([$name,$slug,$price,$description,$categoryId,$mainImage]);
-            $productId = (int)$pdo->lastInsertId();
-            foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$productId,$g]);
-            setFlash('success', 'Product added successfully.');
-        }
-        redirect('products-list.php');
-    } catch (Throwable $e) {
-        setFlash('danger', $e->getMessage());
-        productRedirect($returnPage, $id);
-    }
- main
 }
 
 if (isset($_GET['delete_image'])) {
@@ -129,10 +116,11 @@ if (isset($_GET['delete_image'])) {
     }
 
     setFlash('success', 'Gallery image removed.');
-    redirect('product-edit.php?id=' . (int)($_GET['edit'] ?? 0));
+    $editId = isset($_GET['edit']) ? (int)$_GET['edit'] : 0;
+    redirect('product-edit.php?id=' . $editId);
 }
 
-$search = trim($_GET['search'] ?? '');
+$search = trim(isset($_GET['search']) ? $_GET['search'] : '');
 $where = $search !== '' ? 'WHERE p.name LIKE ?' : '';
 $countStmt = $pdo->prepare("SELECT COUNT(*) FROM products p $where");
 $countStmt->execute($search !== '' ? ["%$search%"] : []);
@@ -171,15 +159,15 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="card p-3 shadow-sm mb-3">
     <h6 class="mb-3">Product Form</h6>
     <form method="post" enctype="multipart/form-data" class="row g-3">
-        <input type="hidden" name="id" value="<?= (int)($edit['id'] ?? 0); ?>">
+        <input type="hidden" name="id" value="<?= isset($edit['id']) ? (int)$edit['id'] : 0; ?>">
         <div class="col-md-4">
             <label class="form-label">Product Name <span class="text-danger">*</span></label>
-            <input name="name" class="form-control" placeholder="Modern Grey Wallpaper" value="<?= htmlspecialchars($edit['name'] ?? ''); ?>" required>
+            <input name="name" class="form-control" placeholder="Modern Grey Wallpaper" value="<?= htmlspecialchars(isset($edit['name']) ? $edit['name'] : ''); ?>" required>
             <?= helpText('Enter a clear product name (e.g., Modern Grey Wallpaper).'); ?>
         </div>
         <div class="col-md-2">
             <label class="form-label">Price (USD) <span class="text-danger">*</span></label>
-            <input type="number" step="0.01" name="price" class="form-control" placeholder="99.99" value="<?= htmlspecialchars($edit['price'] ?? ''); ?>" required>
+            <input type="number" step="0.01" name="price" class="form-control" placeholder="99.99" value="<?= htmlspecialchars(isset($edit['price']) ? $edit['price'] : ''); ?>" required>
             <?= helpText('Price is per design package in USD.'); ?>
         </div>
         <div class="col-md-3">
@@ -187,7 +175,7 @@ require_once __DIR__ . '/../includes/header.php';
             <select name="category_id" class="form-select">
                 <option value="">Category</option>
                 <?php foreach ($categories as $cat): ?>
-                    <option value="<?= $cat['id']; ?>" <?= (int)($edit['category_id'] ?? 0) === (int)$cat['id'] ? 'selected' : ''; ?>><?= htmlspecialchars($cat['name']); ?></option>
+                    <option value="<?= $cat['id']; ?>" <?= ((isset($edit['category_id']) ? (int)$edit['category_id'] : 0) === (int)$cat['id']) ? 'selected' : ''; ?>><?= htmlspecialchars($cat['name']); ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -203,7 +191,7 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
         <div class="col-12">
             <label class="form-label">Description <span class="text-danger">*</span></label>
-            <textarea name="description" class="form-control editor" rows="3" placeholder="Write full product details" required><?= htmlspecialchars($edit['description'] ?? ''); ?></textarea>
+            <textarea name="description" class="form-control editor" rows="3" placeholder="Write full product details" required><?= htmlspecialchars(isset($edit['description']) ? $edit['description'] : ''); ?></textarea>
         </div>
         <div class="col-12"><button class="btn btn-dark"><i class="bi bi-save"></i> <?= $edit ? 'Update' : 'Add'; ?> Product</button></div>
     </form>
@@ -241,7 +229,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <tr>
                     <td><?= htmlspecialchars($r['name']); ?></td>
                     <td><small><?= htmlspecialchars($r['slug']); ?></small></td>
-                    <td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td>
+                    <td><?= htmlspecialchars(isset($r['category_name']) ? $r['category_name'] : '-'); ?></td>
                     <td>$<?= number_format((float)$r['price'], 2); ?></td>
                     <td><?php if ($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70" alt="main image"><?php endif; ?></td>
                     <td>
