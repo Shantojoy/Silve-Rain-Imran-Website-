@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         productRedirect($returnPage, (int)($_GET['edit'] ?? 0));
     }
 
+ main
     try {
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
@@ -101,6 +102,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setFlash('danger', $e->getMessage());
         productRedirect($returnPage, $id ?? 0);
     }
+            setFlash('success', 'Product updated successfully.');
+        } else {
+            $pdo->prepare('INSERT INTO products (name,slug,price,description,category_id,main_image,is_virtual) VALUES (?,?,?,?,?,?,1)')->execute([$name,$slug,$price,$description,$categoryId,$mainImage]);
+            $productId = (int)$pdo->lastInsertId();
+            foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$productId,$g]);
+            setFlash('success', 'Product added successfully.');
+        }
+        redirect('products-list.php');
+    } catch (Throwable $e) {
+        setFlash('danger', $e->getMessage());
+        productRedirect($returnPage, $id);
+    }
+ main
 }
 
 if (isset($_GET['delete_image'])) {
