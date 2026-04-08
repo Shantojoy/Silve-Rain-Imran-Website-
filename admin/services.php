@@ -64,7 +64,7 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
         <div class="col-12">
             <label class="form-label">Description <span class="text-danger">*</span></label>
-            <textarea name="description" class="form-control" rows="3" placeholder="Explain what this service includes" required><?= htmlspecialchars($edit['description'] ?? ''); ?></textarea>
+            <textarea name="description" class="form-control editor" rows="3" placeholder="Explain what this service includes" required><?= htmlspecialchars($edit['description'] ?? ''); ?></textarea>
             <?= helpText('Include what is covered, materials, and expected finish.'); ?>
         </div>
         <div class="col-12"><button class="btn btn-dark"><i class="bi bi-save"></i> <?= $edit ? 'Update' : 'Add'; ?> Service</button></div>

@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS settings (
   whatsapp_message VARCHAR(255) DEFAULT 'Hi, I need help with wallpaper and painting services.',
   email_sender_name VARCHAR(120) DEFAULT 'PaintPro',
   email_sender_email VARCHAR(120) DEFAULT 'noreply@paintpro.local',
+  invoice_prefix VARCHAR(20) DEFAULT 'INV',
+  quotation_prefix VARCHAR(20) DEFAULT 'QUO',
+  invoice_terms TEXT,
+  invoice_footer TEXT,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -38,7 +42,7 @@ CREATE TABLE IF NOT EXISTS categories (
 CREATE TABLE IF NOT EXISTS services (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(150) NOT NULL,
-  description TEXT NOT NULL,
+  description LONGTEXT NOT NULL,
   image VARCHAR(255) DEFAULT NULL,
   category_id INT DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -49,6 +53,8 @@ CREATE TABLE IF NOT EXISTS gallery (
   id INT AUTO_INCREMENT PRIMARY KEY,
   title VARCHAR(150) NOT NULL,
   category_id INT DEFAULT NULL,
+  description LONGTEXT,
+  location VARCHAR(160) DEFAULT NULL,
   before_image VARCHAR(255) DEFAULT NULL,
   after_image VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -131,6 +137,65 @@ CREATE TABLE IF NOT EXISTS order_items (
   CONSTRAINT fk_order_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS invoices (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  invoice_no VARCHAR(40) NOT NULL UNIQUE,
+  customer_id INT NOT NULL,
+  issue_date DATE NOT NULL,
+  due_date DATE DEFAULT NULL,
+  status ENUM('Paid','Partial','Due') DEFAULT 'Due',
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+  paid_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  due_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_invoice_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  invoice_id INT NOT NULL,
+  item_name VARCHAR(180) NOT NULL,
+  quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
+  unit_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  line_total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  CONSTRAINT fk_invoice_items_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quotations (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  quotation_no VARCHAR(40) NOT NULL UNIQUE,
+  customer_id INT NOT NULL,
+  issue_date DATE NOT NULL,
+  valid_until DATE DEFAULT NULL,
+  status ENUM('Draft','Sent','Accepted','Rejected','Converted') DEFAULT 'Draft',
+  subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_quotation_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quotation_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  quotation_id INT NOT NULL,
+  item_name VARCHAR(180) NOT NULL,
+  quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
+  unit_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+  line_total DECIMAL(10,2) NOT NULL DEFAULT 0,
+  CONSTRAINT fk_quotation_items_quotation FOREIGN KEY (quotation_id) REFERENCES quotations(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  invoice_id INT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  payment_date DATE NOT NULL,
+  method VARCHAR(80) DEFAULT 'Cash',
+  note VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_payments_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS email_templates (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,
@@ -171,8 +236,8 @@ CREATE TABLE IF NOT EXISTS blogs (
   CONSTRAINT fk_blog_category FOREIGN KEY (category_id) REFERENCES blog_categories(id) ON DELETE SET NULL
 );
 
-INSERT INTO settings (site_name, site_description, contact_email, phone, address, payment_instructions, whatsapp_number, whatsapp_message, email_sender_name, email_sender_email)
-SELECT 'PaintPro', 'Professional painting and wallpaper solutions.', 'hello@paintpro.com', '+1 (555) 321-9988', '245 Design Street, New York, USA', 'Cash on Delivery (COD). Our team will contact you to confirm order details.', '15553219988', 'Hi, I want to request painting/wallpaper service.', 'PaintPro', 'noreply@paintpro.local'
+INSERT INTO settings (site_name, site_description, contact_email, phone, address, payment_instructions, whatsapp_number, whatsapp_message, email_sender_name, email_sender_email, invoice_terms, invoice_footer)
+SELECT 'PaintPro', 'Professional painting and wallpaper solutions.', 'hello@paintpro.com', '+1 (555) 321-9988', '245 Design Street, New York, USA', 'Cash on Delivery (COD).', '15553219988', 'Hi, I want to request painting/wallpaper service.', 'PaintPro', 'noreply@paintpro.local', 'Payment due within 7 days.', 'Thank you for choosing PaintPro.'
 WHERE NOT EXISTS (SELECT 1 FROM settings);
 
 INSERT INTO users (name, email, password, role)

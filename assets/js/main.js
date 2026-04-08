@@ -14,5 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (window.tinymce) {
+    tinymce.init({
+      selector: 'textarea.editor',
+      height: 320,
+      plugins: 'link image lists table code preview',
+      toolbar: 'undo redo | styles | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | code preview'
+    });
+  }
+
   document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new bootstrap.Tooltip(el));
 });
