@@ -17,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = (int)($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $price = (float)($_POST['price'] ?? 0);
+        $slugBase = slugify($name);
         $description = trim($_POST['description'] ?? '');
         $categoryId = !empty($_POST['category_id']) ? (int)$_POST['category_id'] : null;
         if (!$name || !$description || $price < 0) throw new RuntimeException('Valid name, price and description are required.');
@@ -24,13 +25,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mainImage = uploadImage('main_image', __DIR__.'/../uploads/products');
         $galleryImages = uploadMultipleImages('gallery_images', __DIR__.'/../uploads/products');
 
+
+        // Generate unique SEO slug
+        $slug = $slugBase;
+        $counter = 1;
+        while (true) {
+            $q = $pdo->prepare('SELECT id FROM products WHERE slug = ?' . ($id ? ' AND id != ?' : '') . ' LIMIT 1');
+            $params = $id ? [$slug, $id] : [$slug];
+            $q->execute($params);
+            if (!$q->fetch()) break;
+            $slug = $slugBase . '-' . $counter++;
+        }
+
         if ($id) {
             $cur = $pdo->prepare('SELECT main_image FROM products WHERE id=?'); $cur->execute([$id]); $old = $cur->fetch();
-            $pdo->prepare('UPDATE products SET name=?,price=?,description=?,category_id=?,main_image=? WHERE id=?')->execute([$name,$price,$description,$categoryId,$mainImage ?: $old['main_image'],$id]);
+            $pdo->prepare('UPDATE products SET name=?,slug=?,price=?,description=?,category_id=?,main_image=? WHERE id=?')->execute([$name,$slug,$price,$description,$categoryId,$mainImage ?: $old['main_image'],$id]);
             foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$id,$g]);
             setFlash('success', 'Product updated.');
         } else {
-            $pdo->prepare('INSERT INTO products (name,price,description,category_id,main_image,is_virtual) VALUES (?,?,?,?,?,1)')->execute([$name,$price,$description,$categoryId,$mainImage]);
+            $pdo->prepare('INSERT INTO products (name,slug,price,description,category_id,main_image,is_virtual) VALUES (?,?,?,?,?,?,1)')->execute([$name,$slug,$price,$description,$categoryId,$mainImage]);
             $productId = (int)$pdo->lastInsertId();
             foreach ($galleryImages as $g) $pdo->prepare('INSERT INTO product_images (product_id,image) VALUES (?,?)')->execute([$productId,$g]);
             setFlash('success', 'Product added.');
@@ -101,5 +114,7 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 </div>
 <?php if ($editImages): ?><div class="card p-3 shadow-sm mb-3"><strong>Current Gallery Images</strong><div class="d-flex flex-wrap gap-2 mt-2"><?php foreach($editImages as $img): ?><div><img src="../uploads/products/<?= htmlspecialchars($img['image']); ?>" width="80"><br><a class="text-danger small" href="?edit=<?= (int)$edit['id']; ?>&delete_image=<?= $img['id']; ?>">remove</a></div><?php endforeach; ?></div></div><?php endif; ?>
-<div class="card shadow-sm"><div class="card-body border-bottom"><form class="row g-2"><div class="col-md-4"><input class="form-control" name="search" placeholder="Search product" value="<?= htmlspecialchars($search); ?>"></div><div class="col-md-2"><button class="btn btn-outline-dark"><i class="bi bi-search"></i> Search</button></div></form></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Main Image</th><th></th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['name']); ?></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td>$<?= number_format((float)$r['price'],2); ?></td><td><?php if($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Edit"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-danger" data-confirm="Delete this product?" href="?delete=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Delete"><i class="bi bi-trash"></i></a></td></tr><?php endforeach; ?></tbody></table></div><div class="card-body"><?php for($i=1;$i<=$pagination['total_pages'];$i++): ?><a class="btn btn-sm <?= $i===$pagination['page'] ? 'btn-dark' : 'btn-outline-dark'; ?>" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>"><?= $i; ?></a> <?php endfor; ?></div></div>
+<div class="card shadow-sm"><div class="card-body border-bottom"><form class="row g-2"><div class="col-md-4"><input class="form-control" name="search" placeholder="Search product" value="<?= htmlspecialchars($search); ?>"></div><div class="col-md-2"><button class="btn btn-outline-dark"><i class="bi bi-search"></i> Search</button></div></form></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Name</th><th>Slug</th><th>Category</th><th>Price</th><th>Main Image</th><th></th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['name']); ?></td><td><small><?= htmlspecialchars($r['slug']); ?></small></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td>$<?= number_format((float)$r['price'],2); ?></td><td><?php if($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Edit"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-danger" data-confirm="Delete this product?" href="?delete=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Delete"><i class="bi bi-trash"></i></a></td></tr><?php endforeach; ?></tbody></table></div><div class="card-body"><?php for($i=1;$i<=$pagination['total_pages'];$i++): ?><a class="btn btn-sm <?= $i===$pagination['page'] ? 'btn-dark' : 'btn-outline-dark'; ?>" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>"><?= $i; ?></a> <?php endfor; ?></div></div>
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>tinymce.init({ selector:'textarea[name=description]', height:260 });</script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

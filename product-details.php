@@ -2,8 +2,14 @@
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/header.php';
 $id = (int)($_GET['id'] ?? 0);
-$stmt = $pdo->prepare('SELECT p.*, c.name category_name FROM products p LEFT JOIN categories c ON c.id=p.category_id WHERE p.id=?');
-$stmt->execute([$id]);
+$slug = trim($_GET['slug'] ?? '');
+if ($slug !== '') {
+    $stmt = $pdo->prepare('SELECT p.*, c.name category_name FROM products p LEFT JOIN categories c ON c.id=p.category_id WHERE p.slug=?');
+    $stmt->execute([$slug]);
+} else {
+    $stmt = $pdo->prepare('SELECT p.*, c.name category_name FROM products p LEFT JOIN categories c ON c.id=p.category_id WHERE p.id=?');
+    $stmt->execute([$id]);
+}
 $product = $stmt->fetch();
 if (!$product) { echo '<div class="alert alert-danger">Product not found.</div>'; require_once __DIR__ . '/includes/footer.php'; exit; }
 $imagesStmt = $pdo->prepare('SELECT image FROM product_images WHERE product_id=?');
@@ -21,7 +27,7 @@ $galleryImages = $imagesStmt->fetchAll(PDO::FETCH_COLUMN);
         <h2><?= htmlspecialchars($product['name']); ?></h2>
         <p class="text-muted">Category: <?= htmlspecialchars($product['category_name'] ?? ''); ?></p>
         <h4 class="mb-3">$<?= number_format((float)$product['price'],2); ?></h4>
-        <p><?= nl2br(htmlspecialchars($product['description'])); ?></p>
+        <div class="mb-3"><?= $product['description']; ?></div>
         <a href="quote.php?product_id=<?= $product['id']; ?>" class="btn btn-warning me-2">Request This Wallpaper</a>
         <a href="checkout.php?product_id=<?= $product['id']; ?>" class="btn btn-dark">Order Now (COD)</a>
     </div>

@@ -16,7 +16,8 @@ function uploadImage(string $fieldName, string $targetDir, array $allowed = ['im
     if (!in_array($mimeType, $allowed, true)) throw new RuntimeException('Only JPG and PNG images are allowed.');
 
     if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
-    $newName = bin2hex(random_bytes(16)) . ($mimeType === 'image/png' ? '.png' : '.jpg');
+    $extMap = ['image/png' => 'png', 'image/jpeg' => 'jpg', 'image/x-icon' => 'ico'];
+    $newName = bin2hex(random_bytes(16)) . '.' . ($extMap[$mimeType] ?? 'jpg');
     $destination = rtrim($targetDir, '/') . '/' . $newName;
     if (!move_uploaded_file($file['tmp_name'], $destination)) throw new RuntimeException('Could not save uploaded image.');
     return $newName;
@@ -63,16 +64,20 @@ function sendTemplateEmail(PDO $pdo, string $triggerType, string $toEmail, array
     $template = $stmt->fetch();
     if (!$template) return;
 
-    $settings = $pdo->query('SELECT email_sender_name, email_sender_address FROM settings LIMIT 1')->fetch();
+    $settings = $pdo->query('SELECT email_sender_name, email_sender_email FROM settings LIMIT 1')->fetch();
     $subject = $template['subject'];
     $body = $template['body'];
     foreach ($vars as $key => $value) {
         $subject = str_replace('{' . $key . '}', (string)$value, $subject);
         $body = str_replace('{' . $key . '}', (string)$value, $body);
+        if ($key === 'order_status') {
+            $subject = str_replace('{status}', (string)$value, $subject);
+            $body = str_replace('{status}', (string)$value, $body);
+        }
     }
 
     $fromName = $settings['email_sender_name'] ?? 'PaintPro';
-    $fromEmail = $settings['email_sender_address'] ?? 'noreply@paintpro.local';
+    $fromEmail = $settings['email_sender_email'] ?? 'noreply@paintpro.local';
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8\r\n";
     $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
@@ -82,4 +87,11 @@ function sendTemplateEmail(PDO $pdo, string $triggerType, string $toEmail, array
 function helpText(string $text): string
 {
     return '<div class="text-muted small mt-1">' . htmlspecialchars($text) . '</div>';
+}
+
+function slugify(string $text): string
+{
+    $text = strtolower(trim($text));
+    $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+    return trim($text, '-') ?: 'item';
 }

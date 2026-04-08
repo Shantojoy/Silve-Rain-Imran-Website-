@@ -1,30 +1,29 @@
-# PaintPro - Core PHP Painting & Wallpaper Website
+# PaintPro - Professional Core PHP + MySQL System
 
-Modernized Core PHP + MySQL system with a minimal admin UI, CRM, notifications, and lead/order workflows.
+A production-ready Painting & Wallpaper business system with:
+- modern admin panel (thin collapsible sidebar + top navbar)
+- leads, orders, customers, products, settings, notifications
+- full blog CMS with TinyMCE editor and SEO fields
+- frontend WhatsApp floating button and branding controls (logo/favicon)
 
-## Latest UI/UX Upgrades
+## Core Features
 
-- Thin collapsible admin sidebar (icon-first, hover-expand labels, active highlight).
-- Top navbar with notification bell + profile dropdown (Profile/Logout).
-- Admin profile update page (`admin/profile.php`).
-- Contextual help text under form fields via reusable helper.
-- WhatsApp floating button on frontend from configurable settings.
-
-## Business Modules
-
-- Leads, orders, customers, categories, services, products, gallery, testimonials.
-- Email templates with trigger and enable/disable control.
-- Order thank-you page after successful checkout.
+- Core PHP (no framework), Bootstrap 5, MySQL, JS
+- Secure auth/session, profile update, secure logout
+- Product SEO slug + gallery images + rich text description
+- Checkout + thank-you page (Cash on Delivery)
+- Email templates with variables and trigger types
+- Blog categories + blog posts + frontend blog list/detail + share buttons
 
 ## Run Locally
 
-1. Import `database.sql` into MySQL.
+1. Import `database.sql`.
 2. Update DB credentials in `includes/db.php`.
-3. Start server:
+3. Run:
    ```bash
    php -S localhost:8000
    ```
-4. Open site: `http://localhost:8000`
-5. Admin login: `http://localhost:8000/admin`
-   - Email: `admin@paintpro.com`
-   - Password: `Admin@123`
+4. Website: `http://localhost:8000`
+5. Admin: `http://localhost:8000/admin`
+   - `admin@paintpro.com`
+   - `Admin@123`

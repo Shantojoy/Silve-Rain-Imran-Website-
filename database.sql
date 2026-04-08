@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS settings (
   id INT AUTO_INCREMENT PRIMARY KEY,
   site_name VARCHAR(150) NOT NULL DEFAULT 'PaintPro',
   site_logo VARCHAR(255) DEFAULT NULL,
+  favicon VARCHAR(255) DEFAULT NULL,
   site_description TEXT,
   contact_email VARCHAR(120) DEFAULT NULL,
   phone VARCHAR(40) DEFAULT NULL,
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS settings (
   whatsapp_number VARCHAR(30) DEFAULT NULL,
   whatsapp_message VARCHAR(255) DEFAULT 'Hi, I need help with wallpaper and painting services.',
   email_sender_name VARCHAR(120) DEFAULT 'PaintPro',
-  email_sender_address VARCHAR(120) DEFAULT 'noreply@paintpro.local',
+  email_sender_email VARCHAR(120) DEFAULT 'noreply@paintpro.local',
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -57,6 +58,7 @@ CREATE TABLE IF NOT EXISTS gallery (
 CREATE TABLE IF NOT EXISTS products (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(150) NOT NULL,
+  slug VARCHAR(180) NOT NULL UNIQUE,
   price DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   main_image VARCHAR(255) DEFAULT NULL,
   description LONGTEXT NOT NULL,
@@ -149,7 +151,27 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO settings (site_name, site_description, contact_email, phone, address, payment_instructions, whatsapp_number, whatsapp_message, email_sender_name, email_sender_address)
+CREATE TABLE IF NOT EXISTS blog_categories (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  slug VARCHAR(140) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS blogs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(180) NOT NULL,
+  slug VARCHAR(200) NOT NULL UNIQUE,
+  content LONGTEXT NOT NULL,
+  featured_image VARCHAR(255) DEFAULT NULL,
+  category_id INT DEFAULT NULL,
+  meta_title VARCHAR(180) DEFAULT NULL,
+  meta_description VARCHAR(255) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_blog_category FOREIGN KEY (category_id) REFERENCES blog_categories(id) ON DELETE SET NULL
+);
+
+INSERT INTO settings (site_name, site_description, contact_email, phone, address, payment_instructions, whatsapp_number, whatsapp_message, email_sender_name, email_sender_email)
 SELECT 'PaintPro', 'Professional painting and wallpaper solutions.', 'hello@paintpro.com', '+1 (555) 321-9988', '245 Design Street, New York, USA', 'Cash on Delivery (COD). Our team will contact you to confirm order details.', '15553219988', 'Hi, I want to request painting/wallpaper service.', 'PaintPro', 'noreply@paintpro.local'
 WHERE NOT EXISTS (SELECT 1 FROM settings);
 

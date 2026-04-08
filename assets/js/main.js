@@ -9,11 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('sidebarToggle');
   if (sidebar && toggle) {
     toggle.addEventListener('click', () => {
-      if (window.innerWidth <= 991) {
-        sidebar.classList.toggle('mobile-open');
-      } else {
-        sidebar.classList.toggle('expanded');
-      }
+      if (window.innerWidth <= 991) sidebar.classList.toggle('mobile-open');
+      else sidebar.classList.toggle('collapsed');
     });
   }
 
