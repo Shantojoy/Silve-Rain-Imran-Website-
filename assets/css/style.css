@@ -1,0 +1,7 @@
+body { background-color: #f8f9fa; }
+.hero-slide { min-height: 60vh; background-size: cover; background-position: center; border-radius: 1rem; }
+.hero-overlay { background: rgba(0,0,0,.55); color:#fff; min-height:60vh; border-radius:1rem; }
+.section-title { font-weight:700; margin-bottom:1.25rem; }
+.card-img-top { height: 220px; object-fit: cover; }
+.before-after img { height: 250px; object-fit: cover; width: 100%; border-radius: .5rem; }
+.table-responsive { overflow-x: auto; }
