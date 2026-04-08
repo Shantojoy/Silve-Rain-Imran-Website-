@@ -39,6 +39,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <button class="btn btn-dark w-100">Login</button>
             </form>
             <small class="text-muted mt-2 d-block">Default: admin@paintpro.com / Admin@123</small>
+            <a class="btn btn-outline-secondary w-100 mt-2" href="register.php">Create Admin Account</a>
         </div>
     </div>
 </div>
