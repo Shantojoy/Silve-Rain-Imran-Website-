@@ -4,12 +4,23 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
 requireLogin();
 
+$view = $_GET['view'] ?? 'all';
+$returnPage = in_array($view, ['add', 'edit', 'list', 'all'], true) ? $view : 'all';
+
+function productRedirect(string $returnPage, int $editId = 0): void
+{
+    if ($returnPage === 'add') redirect('product-add.php');
+    if ($returnPage === 'edit') redirect('product-edit.php?id=' . $editId);
+    if ($returnPage === 'list') redirect('products-list.php');
+    redirect('products.php');
+}
+
 if (isset($_GET['delete'])) {
     $id = (int)$_GET['delete'];
     $img = $pdo->prepare('SELECT main_image FROM products WHERE id=?'); $img->execute([$id]); $prod = $img->fetch();
     $pdo->prepare('DELETE FROM products WHERE id=?')->execute([$id]);
     if (!empty($prod['main_image'])) deleteUploadedFile(__DIR__.'/../uploads/products/'.$prod['main_image']);
-    setFlash('success', 'Product deleted.'); redirect('products.php');
+    setFlash('success', 'Product deleted.'); productRedirect($returnPage);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -52,14 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setFlash('success', 'Product added.');
         }
     } catch (Throwable $e) { setFlash('danger', $e->getMessage()); }
-    redirect('products.php');
+    productRedirect($returnPage);
 }
 
 if (isset($_GET['delete_image'])) {
     $id = (int)$_GET['delete_image'];
     $q = $pdo->prepare('SELECT image FROM product_images WHERE id=?'); $q->execute([$id]); $row=$q->fetch();
     if ($row) { $pdo->prepare('DELETE FROM product_images WHERE id=?')->execute([$id]); deleteUploadedFile(__DIR__.'/../uploads/products/'.$row['image']); }
-    setFlash('success', 'Gallery image removed.'); redirect('products.php?edit='.(int)($_GET['edit'] ?? 0));
+    setFlash('success', 'Gallery image removed.'); redirect('product-edit.php?id='.(int)($_GET['edit'] ?? 0));
 }
 
 $search = trim($_GET['search'] ?? '');
@@ -80,7 +91,14 @@ if (isset($_GET['edit'])) {
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
-<h1 class="section-title">Products</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="section-title mb-0">Products</h1>
+    <div class="btn-group">
+        <a class="btn btn-outline-dark <?= $view==='list' ? 'active' : ''; ?>" href="products-list.php"><i class="bi bi-list-ul"></i> Product List</a>
+        <a class="btn btn-dark <?= in_array($view,['add','edit'],true) ? 'active' : ''; ?>" href="product-add.php"><i class="bi bi-plus-circle"></i> Add Product</a>
+    </div>
+</div>
+<?php if (in_array($view, ['all', 'add', 'edit'], true)): ?>
 <div class="card p-3 shadow-sm mb-3">
     <h6 class="mb-3">Product Form</h6>
     <form method="post" enctype="multipart/form-data" class="row g-3">
@@ -116,6 +134,9 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="col-12"><button class="btn btn-dark"><i class="bi bi-save"></i> <?= $edit ? 'Update':'Add'; ?> Product</button></div>
     </form>
 </div>
-<?php if ($editImages): ?><div class="card p-3 shadow-sm mb-3"><strong>Current Gallery Images</strong><div class="d-flex flex-wrap gap-2 mt-2"><?php foreach($editImages as $img): ?><div><img src="../uploads/products/<?= htmlspecialchars($img['image']); ?>" width="80"><br><a class="text-danger small" href="?edit=<?= (int)$edit['id']; ?>&delete_image=<?= $img['id']; ?>">remove</a></div><?php endforeach; ?></div></div><?php endif; ?>
-<div class="card shadow-sm"><div class="card-body border-bottom"><form class="row g-2"><div class="col-md-4"><input class="form-control" name="search" placeholder="Search product" value="<?= htmlspecialchars($search); ?>"></div><div class="col-md-2"><button class="btn btn-outline-dark"><i class="bi bi-search"></i> Search</button></div></form></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Name</th><th>Slug</th><th>Category</th><th>Price</th><th>Main Image</th><th></th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['name']); ?></td><td><small><?= htmlspecialchars($r['slug']); ?></small></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td>$<?= number_format((float)$r['price'],2); ?></td><td><?php if($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="?edit=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Edit"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-danger" data-confirm="Delete this product?" href="?delete=<?= $r['id']; ?>" data-bs-toggle="tooltip" title="Delete"><i class="bi bi-trash"></i></a></td></tr><?php endforeach; ?></tbody></table></div><div class="card-body"><?php for($i=1;$i<=$pagination['total_pages'];$i++): ?><a class="btn btn-sm <?= $i===$pagination['page'] ? 'btn-dark' : 'btn-outline-dark'; ?>" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>"><?= $i; ?></a> <?php endfor; ?></div></div>
+<?php if ($editImages): ?><div class="card p-3 shadow-sm mb-3"><strong>Current Gallery Images</strong><div class="d-flex flex-wrap gap-2 mt-2"><?php foreach($editImages as $img): ?><div><img src="../uploads/products/<?= htmlspecialchars($img['image']); ?>" width="80"><br><a class="text-danger small" href="product-edit.php?id=<?= (int)$edit['id']; ?>&delete_image=<?= $img['id']; ?>&edit=<?= (int)$edit['id']; ?>">remove</a></div><?php endforeach; ?></div></div><?php endif; ?>
+<?php endif; ?>
+<?php if (in_array($view, ['all', 'list'], true)): ?>
+<div class="card shadow-sm"><div class="card-body border-bottom"><form class="row g-2"><div class="col-md-4"><input class="form-control" name="search" placeholder="Search product" value="<?= htmlspecialchars($search); ?>"></div><input type="hidden" name="view" value="<?= htmlspecialchars($view); ?>"><div class="col-md-2"><button class="btn btn-outline-dark"><i class="bi bi-search"></i> Search</button></div></form></div><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Name</th><th>Slug</th><th>Category</th><th>Price</th><th>Main Image</th><th></th></tr></thead><tbody><?php foreach($rows as $r): ?><tr><td><?= htmlspecialchars($r['name']); ?></td><td><small><?= htmlspecialchars($r['slug']); ?></small></td><td><?= htmlspecialchars($r['category_name'] ?? '-'); ?></td><td>$<?= number_format((float)$r['price'],2); ?></td><td><?php if($r['main_image']): ?><img src="../uploads/products/<?= htmlspecialchars($r['main_image']); ?>" width="70"><?php endif; ?></td><td><a class="btn btn-sm btn-primary" href="product-edit.php?id=<?= $r['id']; ?>"><i class="bi bi-pencil"></i></a> <a class="btn btn-sm btn-danger" data-confirm="Delete this product?" href="?delete=<?= $r['id']; ?>&view=<?= urlencode($view); ?>"><i class="bi bi-trash"></i></a></td></tr><?php endforeach; ?></tbody></table></div><div class="card-body"><?php for($i=1;$i<=$pagination['total_pages'];$i++): ?><a class="btn btn-sm <?= $i===$pagination['page'] ? 'btn-dark' : 'btn-outline-dark'; ?>" href="?page=<?= $i; ?>&search=<?= urlencode($search); ?>&view=<?= urlencode($view); ?>"><?= $i; ?></a> <?php endfor; ?></div></div>
+<?php endif; ?>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

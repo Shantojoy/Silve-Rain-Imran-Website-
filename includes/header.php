@@ -30,7 +30,7 @@ if($showAdminShell){$unreadCount=(int)$pdo->query('SELECT COUNT(*) FROM notifica
 <a class="admin-link" data-bs-toggle="collapse" href="#menuServices"><i class="bi bi-briefcase"></i><span class="menu-text">Services</span></a>
 <div class="collapse <?= in_array($currentFile,['services.php'])?'show':''; ?>" id="menuServices"><a href="services.php" class="admin-sublink">All Services</a></div>
 <a class="admin-link" data-bs-toggle="collapse" href="#menuCatalog"><i class="bi bi-box-seam"></i><span class="menu-text">Catalog</span></a>
-<div class="collapse <?= in_array($currentFile,['categories.php','products.php'])?'show':''; ?>" id="menuCatalog"><a href="categories.php" class="admin-sublink">Categories</a><a href="products.php" class="admin-sublink">Products</a></div>
+<div class="collapse <?= in_array($currentFile,['categories.php','products.php','product-add.php','product-edit.php','products-list.php'])?'show':''; ?>" id="menuCatalog"><a href="categories.php" class="admin-sublink">Categories</a><a href="products-list.php" class="admin-sublink">Product List</a><a href="product-add.php" class="admin-sublink">Add Product</a></div>
 <a class="admin-link" data-bs-toggle="collapse" href="#menuGallery"><i class="bi bi-images"></i><span class="menu-text">Gallery</span></a>
 <div class="collapse <?= $currentFile==='gallery.php'?'show':''; ?>" id="menuGallery"><a href="gallery.php" class="admin-sublink">All Gallery</a></div>
 <a class="admin-link" data-bs-toggle="collapse" href="#menuSales"><i class="bi bi-receipt"></i><span class="menu-text">Sales</span></a>

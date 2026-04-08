@@ -1,1 +1,1 @@
-<?php $id=(int)($_GET['id'] ?? 0); header('Location: products.php?edit='.$id); exit; ?>
+<?php $_GET['view'] = 'edit'; require_once __DIR__ . '/products.php'; ?>
