@@ -18,7 +18,7 @@ $galleryImages = $imagesStmt->fetchAll(PDO::FETCH_COLUMN);
 ?>
 <div class="row g-4">
     <div class="col-lg-6">
-        <div id="productSlider" class="carousel slide"><div class="carousel-inner rounded shadow-sm">
+        <div class="card page-card p-3"><div id="productSlider" class="carousel slide"><div class="carousel-inner rounded">
             <div class="carousel-item active">
                 <?php if (!empty($product['main_image'])): ?>
                     <img src="uploads/products/<?= htmlspecialchars($product['main_image']); ?>" class="d-block w-100" alt="main">
@@ -36,15 +36,17 @@ $galleryImages = $imagesStmt->fetchAll(PDO::FETCH_COLUMN);
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+        </div>
     </div>
     <div class="col-lg-6">
-        <h2><?= htmlspecialchars($product['name']); ?></h2>
+        <div class="card page-card p-4"><h2><?= htmlspecialchars($product['name']); ?></h2>
         <p class="text-muted">Category: <?= htmlspecialchars($product['category_name'] ?? ''); ?></p>
         <h4 class="mb-3">$<?= number_format((float)$product['price'],2); ?></h4>
         <div class="mb-3"><?= $product['description']; ?></div>
         <a href="quote.php?product_id=<?= $product['id']; ?>" class="btn btn-warning me-2">Request This Wallpaper</a>
         <a href="product-gallery.php?slug=<?= urlencode($product['slug']); ?>" class="btn btn-outline-secondary me-2">View Product Gallery</a>
         <a href="checkout.php?product_id=<?= $product['id']; ?>" class="btn btn-dark">Order Now (COD)</a>
+        </div>
     </div>
 </div>
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

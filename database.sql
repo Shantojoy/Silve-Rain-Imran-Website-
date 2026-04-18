@@ -124,9 +124,26 @@ CREATE TABLE IF NOT EXISTS orders (
   email VARCHAR(120) NOT NULL,
   address VARCHAR(255) NOT NULL,
   total_amount DECIMAL(10,2) NOT NULL,
-  status ENUM('Pending','Processing','Completed','Cancelled') DEFAULT 'Pending',
+  status ENUM('Pending','Approved','Cancelled') DEFAULT 'Pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS email_settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  template_subject VARCHAR(255) NOT NULL DEFAULT 'Notification from PaintPro',
+  template_body MEDIUMTEXT NOT NULL DEFAULT '<p>Hello {customer_name},</p><p>Thank you for contacting us.</p>',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS smtp_settings (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  host VARCHAR(150) DEFAULT NULL,
+  port INT DEFAULT 587,
+  username VARCHAR(150) DEFAULT NULL,
+  password VARCHAR(255) DEFAULT NULL,
+  encryption VARCHAR(20) DEFAULT 'tls',
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS order_items (
@@ -245,3 +262,11 @@ WHERE NOT EXISTS (SELECT 1 FROM settings);
 INSERT INTO users (name, email, password, role)
 SELECT 'Administrator', 'admin@paintpro.com', '$2y$10$R5j0f6Jf9n9jsiTnQM0a7OdGf1t5O6LQkT2eA7UIv4BfUo7xM3v7y', 'admin'
 WHERE NOT EXISTS (SELECT 1 FROM users WHERE email='admin@paintpro.com');
+
+INSERT INTO email_settings (template_subject, template_body)
+SELECT 'Notification from PaintPro', '<p>Hello {customer_name},</p><p>Your request has been received.</p>'
+WHERE NOT EXISTS (SELECT 1 FROM email_settings);
+
+INSERT INTO smtp_settings (host, port, username, password, encryption)
+SELECT '', 587, '', '', 'tls'
+WHERE NOT EXISTS (SELECT 1 FROM smtp_settings);

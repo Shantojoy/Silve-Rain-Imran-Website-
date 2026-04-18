@@ -47,7 +47,7 @@ $products = $pdo->query('SELECT id,name FROM products ORDER BY name')->fetchAll(
 require_once __DIR__ . '/includes/header.php';
 ?>
 <h1 class="section-title">Get a Quote</h1>
-<div class="card p-4 shadow-sm">
+<div class="card page-card p-4">
 <form method="POST" enctype="multipart/form-data" class="row g-3">
 <div class="col-md-6"><label class="form-label">Name *</label><input type="text" name="name" class="form-control" required></div>
 <div class="col-md-6"><label class="form-label">Phone *</label><input type="text" name="phone" class="form-control" required></div>

@@ -8,7 +8,7 @@ if(!$blog){die('Blog not found');}
 require_once __DIR__ . '/includes/header.php';
 $shareUrl = urlencode((isset($_SERVER['HTTPS'])?'https':'http').'://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 ?>
-<div class="card shadow-sm p-4">
+<div class="card page-card p-4">
     <h1><?= htmlspecialchars($blog['title']); ?></h1>
     <p class="text-muted small"><?= htmlspecialchars($blog['category_name'] ?? ''); ?> • <?= date('M d, Y', strtotime($blog['created_at'])); ?></p>
     <?php if($blog['featured_image']): ?><img src="uploads/products/<?= htmlspecialchars($blog['featured_image']); ?>" class="img-fluid rounded mb-3" alt="blog"><?php endif; ?>

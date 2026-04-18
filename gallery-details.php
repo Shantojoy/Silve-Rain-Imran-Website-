@@ -30,10 +30,11 @@ $shareUrl = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https'
     </ol>
 </nav>
 
-<div class="row g-4">
+<div class="row g-4 align-items-start">
     <div class="col-lg-7">
+        <div class="card page-card p-3">
         <div id="galleryDetailsSlider" class="carousel slide">
-            <div class="carousel-inner rounded shadow-sm">
+            <div class="carousel-inner rounded">
                 <?php if (!empty($item['before_image'])): ?>
                     <div class="carousel-item active">
                         <img src="uploads/gallery/<?= htmlspecialchars($item['before_image']); ?>" class="d-block w-100" alt="Before image">
@@ -52,18 +53,21 @@ $shareUrl = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https'
                 <span class="carousel-control-next-icon"></span>
             </button>
         </div>
+        </div>
     </div>
     <div class="col-lg-5">
-        <h1 class="h3 mb-2"><?= htmlspecialchars($item['title']); ?></h1>
-        <p class="mb-1"><span class="badge bg-secondary"><?= htmlspecialchars($item['category_name'] ?? 'Uncategorized'); ?></span></p>
-        <p class="text-muted mb-3"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($item['location'] ?: 'Location not specified'); ?></p>
-        <div class="mb-3"><?= $item['description'] ?: '<span class="text-muted">No project details provided.</span>'; ?></div>
+        <div class="card page-card p-4">
+            <h1 class="h3 mb-2"><?= htmlspecialchars($item['title']); ?></h1>
+            <p class="mb-1"><span class="badge bg-secondary"><?= htmlspecialchars($item['category_name'] ?? 'Uncategorized'); ?></span></p>
+            <p class="text-muted mb-3"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($item['location'] ?: 'Location not specified'); ?></p>
+            <div class="mb-3"><?= $item['description'] ?: '<span class="text-muted">No project details provided.</span>'; ?></div>
 
-        <h6>Share this project</h6>
-        <div class="d-flex gap-2 flex-wrap">
-            <a class="btn btn-outline-primary btn-sm" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($shareUrl); ?>"><i class="bi bi-facebook"></i> Facebook</a>
-            <a class="btn btn-outline-info btn-sm" target="_blank" href="https://twitter.com/intent/tweet?url=<?= urlencode($shareUrl); ?>&text=<?= urlencode($item['title']); ?>"><i class="bi bi-twitter-x"></i> X</a>
-            <a class="btn btn-outline-success btn-sm" target="_blank" href="https://wa.me/?text=<?= urlencode($item['title'] . ' - ' . $shareUrl); ?>"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            <h6>Share this project</h6>
+            <div class="d-flex gap-2 flex-wrap">
+                <a class="btn btn-outline-primary btn-sm" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode($shareUrl); ?>"><i class="bi bi-facebook"></i> Facebook</a>
+                <a class="btn btn-outline-info btn-sm" target="_blank" href="https://twitter.com/intent/tweet?url=<?= urlencode($shareUrl); ?>&text=<?= urlencode($item['title']); ?>"><i class="bi bi-twitter-x"></i> X</a>
+                <a class="btn btn-outline-success btn-sm" target="_blank" href="https://wa.me/?text=<?= urlencode($item['title'] . ' - ' . $shareUrl); ?>"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            </div>
         </div>
     </div>
 </div>

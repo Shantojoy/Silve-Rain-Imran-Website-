@@ -62,7 +62,11 @@ function sendTemplateEmail(PDO $pdo, string $triggerType, string $toEmail, array
     $stmt = $pdo->prepare('SELECT subject, body FROM email_templates WHERE trigger_type = ? AND status = ? ORDER BY id DESC LIMIT 1');
     $stmt->execute([$triggerType, 'enabled']);
     $template = $stmt->fetch();
-    if (!$template) return;
+    if (!$template) {
+        $defaultTemplate = $pdo->query('SELECT template_subject, template_body FROM email_settings ORDER BY id DESC LIMIT 1')->fetch();
+        if (!$defaultTemplate) return;
+        $template = ['subject' => $defaultTemplate['template_subject'], 'body' => $defaultTemplate['template_body']];
+    }
 
     $settings = $pdo->query('SELECT email_sender_name, email_sender_email FROM settings LIMIT 1')->fetch();
     $subject = $template['subject'];

@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sidebar && toggle) {
     toggle.addEventListener('click', () => {
       if (window.innerWidth <= 991) sidebar.classList.toggle('mobile-open');
-      else sidebar.classList.toggle('collapsed');
     });
   }
 

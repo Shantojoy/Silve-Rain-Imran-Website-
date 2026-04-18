@@ -15,6 +15,7 @@ $items = $itemStmt->fetchAll();
 <div class="card shadow-sm p-4 text-center mb-4">
     <h1 class="text-success"><i class="bi bi-check-circle"></i> Thank you for your order!</h1>
     <p class="mb-0">Your order has been placed successfully with Cash on Delivery.</p>
+    <div class="mt-3"><a class="btn btn-outline-dark" href="track-order.php?search=1&order_id=<?= (int)$order['id']; ?>">Track This Order</a></div>
 </div>
 <div class="row g-3">
     <div class="col-md-6"><div class="card p-3 shadow-sm"><strong>Order ID</strong><div>#<?= $order['id']; ?></div></div></div>
